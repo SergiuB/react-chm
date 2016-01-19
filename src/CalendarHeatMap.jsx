@@ -1,17 +1,17 @@
 import React from 'react';
-import d3 from 'd3';
-import 'd3-time';
-import 'd3-time-format';
-import 'd3-scale';
+import {
+  format, timeFormat, timeParse,
+  timeDay, timeDays, timeWeek, timeMonths, timeMonth, timeYears, timeYear,
+  values, scaleQuantile, range, nest} from 'd3';
 
-import './CalendarHeatMap.css';
+import './CalendarHeatMap.css'; 
 
-let day = d3.timeFormat("%w"),
-    week = d3.timeFormat("%U"),
-    month= d3.timeFormat("%b"),
-    formatDate = d3.timeFormat("%Y-%m-%d"),
-    formatNumber = d3.format(",.2f"),
-    formatPercent = d3.format("+.1%");
+let day = timeFormat("%w"),
+    week = timeFormat("%U"),
+    month= timeFormat("%b"),
+    formatDate = timeFormat("%Y-%m-%d"),
+    formatNumber = format(",.2f"),
+    formatPercent = format("+.1%");
 
 let CalendarHeatMap = React.createClass({
   getDefaultProps: function() {
@@ -26,24 +26,24 @@ let CalendarHeatMap = React.createClass({
         dataArr = this.props.data,
         firstDate = dataArr[0].date,
         lastDate = dataArr[dataArr.length-1].date,
-        weeks = d3.timeWeek.count(firstDate, lastDate),
+        weeks = timeWeek.count(firstDate, lastDate),
         w = z * (weeks+1),
         h = z * 7;
 
-    let data = d3.nest()
+    let data = nest()
           .key(function(d) { return d.date; })
           .rollup(function(d) { return +d[0].value; })
           .map(this.props.data);
 
-    let domain = this.props.domainFn ? this.props.domainFn() : d3.values(data);
-    let color = d3.scaleQuantile()
+    let domain = this.props.domainFn ? this.props.domainFn() : values(data);
+    let color = scaleQuantile()
             .domain(domain)
-            .range(d3.range(9));
+            .range(range(9));
 
-    let days = d3.timeDays(firstDate, d3.timeDay.offset(lastDate)).map(
+    let days = timeDays(firstDate, timeDay.offset(lastDate)).map(
       d => {
         let rectClass = 'day q' + color(data.get(d)) + "-9";
-        return <rect key={d} className={rectClass} width={z} height={z} x={d3.timeWeek.count(firstDate, d) * z} y={day(d) * z}>
+        return <rect key={d} className={rectClass} width={z} height={z} x={timeWeek.count(firstDate, d) * z} y={day(d) * z}>
           <title>{formatDate(d) + ": " + formatNumber(data.get(d))}</title>
         </rect>;
       }
@@ -51,8 +51,8 @@ let CalendarHeatMap = React.createClass({
 
     let monthPath = t0 => {
       var t1 = new Date(t0.getFullYear(), t0.getMonth() + 1, 0),
-          d0 = +day(t0), w0 = d3.timeWeek.count(firstDate, t0),
-          d1 = +day(t1), w1 = d3.timeWeek.count(firstDate, t1);
+          d0 = +day(t0), w0 = timeWeek.count(firstDate, t0),
+          d1 = +day(t1), w1 = timeWeek.count(firstDate, t1);
       return "M" + (w0 + 1) * z + "," + d0 * z
           + "H" + w0 * z + "V" + 7 * z
           + "H" + w1 * z + "V" + (d1 + 1) * z
@@ -61,8 +61,8 @@ let CalendarHeatMap = React.createClass({
     };
 
     let timeWholeMonths = (startDate, endDate) => {
-      let monthArr = d3.timeMonths(startDate, endDate);
-      if (+d3.timeMonth.ceil(lastDate) !== +d3.timeDay.offset(lastDate)) {
+      let monthArr = timeMonths(startDate, endDate);
+      if (+timeMonth.ceil(lastDate) !== +timeDay.offset(lastDate)) {
         monthArr.pop();
       }
       return monthArr;
@@ -73,21 +73,21 @@ let CalendarHeatMap = React.createClass({
     );
 
     let timeAllMonths = (startDate, endDate) => {
-      let monthArr = d3.timeMonths(startDate, endDate);
+      let monthArr = timeMonths(startDate, endDate);
       monthArr.unshift(startDate);
       return monthArr;
     };
 
     let monthLabels = timeAllMonths(firstDate, lastDate).map(
-      d => <text key={d} x={ d3.timeWeek.count(firstDate,d) * z + 2} y={ z * 7 + 12}>{month(d)}</text>
+      d => <text key={d} x={ timeWeek.count(firstDate,d) * z + 2} y={ z * 7 + 12}>{month(d)}</text>
     );
 
-    let years = d3.timeYears(firstDate, lastDate);
+    let years = timeYears(firstDate, lastDate);
     years.unshift(firstDate);
     let yearXPos = d => {
       let t0 = Math.max(d, firstDate);
-      let t1 = Math.min(d3.timeYear.offset(d), lastDate);
-      return (d3.timeWeek.count(t0, t1) / 2 + d3.timeWeek.count(firstDate, d)) * z;
+      let t1 = Math.min(timeYear.offset(d), lastDate);
+      return (timeWeek.count(t0, t1) / 2 + timeWeek.count(firstDate, d)) * z;
     };
     let yearLabels = years.length
       ? years.map(d => <text key={d} x={yearXPos(d)} y={-4}>{d.getFullYear()}</text>)
@@ -107,8 +107,8 @@ let CalendarHeatMap = React.createClass({
             {monthPaths}
             {monthLabels}
             {yearLabels}
-            <line className='frame' x1="0" y1="0" x2={ d3.timeWeek.count(firstDate,lastDate) * z + z} y2="0"/>
-            <line className='frame' x1="0" y1={z*7} x2={ d3.timeWeek.count(firstDate,lastDate) * z + z} y2={z*7}/>
+            <line className='frame' x1="0" y1="0" x2={ timeWeek.count(firstDate,lastDate) * z + z} y2="0"/>
+            <line className='frame' x1="0" y1={z*7} x2={ timeWeek.count(firstDate,lastDate) * z + z} y2={z*7}/>
           </g>
         </svg>
       </div>;

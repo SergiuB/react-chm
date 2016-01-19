@@ -1,22 +1,18 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import d3 from 'd3';
-import 'd3-time';
-import 'd3-time-format';
-import 'd3-request';
-import 'd3-scale';
+import {timeParse, timeFormat, timeDay, requestJson} from 'd3';
 import _ from 'lodash';
 
 import './style.css';
 
 import {CalendarHeatMap} from 'react-chm';
 
-var parseDate = d3.timeParse("%Y-%m-%d");
-var formatDate = d3.timeFormat("%Y-%m-%d");
+var parseDate = timeParse("%Y-%m-%d");
+var formatDate = timeFormat("%Y-%m-%d");
 
 let endDate = new Date();
-let startDate = d3.timeDay.offset(endDate, -365);
+let startDate = timeDay.offset(endDate, -365);
 
 let StockChm = React.createClass({
     getDefaultProps: function () {
@@ -34,7 +30,7 @@ let StockChm = React.createClass({
                and    endDate   = "${formatDate(endDate)}"
       &format=json&env=store://datatables.org/alltableswithkeys`
       this.setState({stockName:'...', quotes:[]});
-      d3.requestJson(query, (error, json) =>  {
+      requestJson(query, (error, json) =>  {
         if (error) {
           this.setState({error})
           return;

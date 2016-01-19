@@ -13,10 +13,7 @@ module.exports = {
   },
   externals: {
     react: 'react',
-    d3: 'd3',
-    "d3-time": 'd3-time',
-    'd3-time-format': 'd3-time-format',
-    'd3-scale': 'd3-scale'
+    d3: 'd3'
   },
   devtool: 'source-map',
   module: {
