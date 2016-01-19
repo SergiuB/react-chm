@@ -4,7 +4,7 @@ import {
   timeDay, timeDays, timeWeek, timeMonths, timeMonth, timeYears, timeYear,
   values, scaleQuantile, range, nest} from 'd3';
 
-import './CalendarHeatMap.css'; 
+import './CalendarHeatMap.css';
 
 let day = timeFormat("%w"),
     week = timeFormat("%U"),
@@ -12,6 +12,8 @@ let day = timeFormat("%w"),
     formatDate = timeFormat("%Y-%m-%d"),
     formatNumber = format(",.2f"),
     formatPercent = format("+.1%");
+
+let isNumber = val => typeof val == 'number';
 
 let CalendarHeatMap = React.createClass({
   getDefaultProps: function() {
@@ -42,9 +44,13 @@ let CalendarHeatMap = React.createClass({
 
     let days = timeDays(firstDate, timeDay.offset(lastDate)).map(
       d => {
-        let rectClass = 'day q' + color(data.get(d)) + "-9";
+        let val = data.get(d);
+        let valFmtd= isNumber(val) ? formatNumber(val) : 'not available'
+        let cls = isNumber(val) ? 'q' + color(val) + "-9" : '';
+
+        let rectClass = 'day ' + cls;
         return <rect key={d} className={rectClass} width={z} height={z} x={timeWeek.count(firstDate, d) * z} y={day(d) * z}>
-          <title>{formatDate(d) + ": " + formatNumber(data.get(d))}</title>
+          <title>{formatDate(d) + ": " + valFmtd}</title>
         </rect>;
       }
     );
