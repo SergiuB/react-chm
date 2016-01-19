@@ -1340,5 +1340,10 @@ svg {
 .month {
   fill: none;
   stroke: #000;
-  stroke-width: 2px;
+  stroke-width: 1px;
+}
+
+.frame {
+  stroke: #000;
+  stroke-width: 1px;
 }

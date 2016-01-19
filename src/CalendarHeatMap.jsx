@@ -10,7 +10,7 @@ let day = d3.timeFormat("%w"),
     week = d3.timeFormat("%U"),
     month= d3.timeFormat("%b"),
     formatDate = d3.timeFormat("%Y-%m-%d"),
-    formatNumber = d3.format(",d"),
+    formatNumber = d3.format(",.2f"),
     formatPercent = d3.format("+.1%");
 
 let CalendarHeatMap = React.createClass({
@@ -27,7 +27,7 @@ let CalendarHeatMap = React.createClass({
         firstDate = dataArr[0].date,
         lastDate = dataArr[dataArr.length-1].date,
         weeks = d3.timeWeek.count(firstDate, lastDate),
-        w = z * weeks,
+        w = z * (weeks+1),
         h = z * 7;
 
     let data = d3.nest()
@@ -35,8 +35,9 @@ let CalendarHeatMap = React.createClass({
           .rollup(function(d) { return +d[0].value; })
           .map(this.props.data);
 
+    let domain = this.props.domainFn ? this.props.domainFn() : d3.values(data);
     let color = d3.scaleQuantile()
-            .domain(d3.values(data))
+            .domain(domain)
             .range(d3.range(9));
 
     let days = d3.timeDays(firstDate, d3.timeDay.offset(lastDate)).map(
@@ -71,11 +72,18 @@ let CalendarHeatMap = React.createClass({
       d => <path key={d} className='month' d={monthPath(d)}></path>
     );
 
-    let monthLabels = timeWholeMonths(firstDate, lastDate).map(
+    let timeAllMonths = (startDate, endDate) => {
+      let monthArr = d3.timeMonths(startDate, endDate);
+      monthArr.unshift(startDate);
+      return monthArr;
+    };
+
+    let monthLabels = timeAllMonths(firstDate, lastDate).map(
       d => <text key={d} x={ d3.timeWeek.count(firstDate,d) * z + 2} y={ z * 7 + 12}>{month(d)}</text>
     );
 
     let years = d3.timeYears(firstDate, lastDate);
+    years.unshift(firstDate);
     let yearXPos = d => {
       let t0 = Math.max(d, firstDate);
       let t1 = Math.min(d3.timeYear.offset(d), lastDate);
@@ -99,6 +107,8 @@ let CalendarHeatMap = React.createClass({
             {monthPaths}
             {monthLabels}
             {yearLabels}
+            <line className='frame' x1="0" y1="0" x2={ d3.timeWeek.count(firstDate,lastDate) * z + z} y2="0"/>
+            <line className='frame' x1="0" y1={z*7} x2={ d3.timeWeek.count(firstDate,lastDate) * z + z} y2={z*7}/>
           </g>
         </svg>
       </div>;
