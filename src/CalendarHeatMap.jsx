@@ -45,7 +45,7 @@ let CalendarHeatMap = React.createClass({
     let days = timeDays(firstDate, timeDay.offset(lastDate)).map(
       d => {
         let val = data.get(d);
-        let valFmtd= isNumber(val) ? formatNumber(val) : 'not available'
+        let valFmtd= isNumber(val) ? formatNumber(val) : 'no data'
         let cls = isNumber(val) ? 'q' + color(val) + "-9" : '';
 
         let rectClass = 'day ' + cls;
@@ -89,6 +89,11 @@ let CalendarHeatMap = React.createClass({
     );
 
     let years = timeYears(firstDate, lastDate);
+    let yearDelim = years.map(d => {
+      let x = timeWeek.count(firstDate,d) * z;
+      return <line className='frame' x1={x} y1="0" x2={x} y2="-5"/>;
+    });
+
     years.unshift(firstDate);
     let yearXPos = d => {
       let t0 = Math.max(d, firstDate);
@@ -113,6 +118,7 @@ let CalendarHeatMap = React.createClass({
             {monthPaths}
             {monthLabels}
             {yearLabels}
+            {yearDelim}
             <line className='frame' x1="0" y1="0" x2={ timeWeek.count(firstDate,lastDate) * z + z} y2="0"/>
             <line className='frame' x1="0" y1={z*7} x2={ timeWeek.count(firstDate,lastDate) * z + z} y2={z*7}/>
           </g>
